@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # backend
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - AWS_REGION=eu-west-1  
+      - TABLE_NAME=todos      
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # frontend
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
