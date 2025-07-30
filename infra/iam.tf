@@ -1,7 +1,4 @@
-# --------------------------------------------
-# Lambda Role & Policy (pour API Gateway)
-# --------------------------------------------
-
+# ----------- Lambda Role & Policy -----------
 data "aws_iam_policy_document" "lambda_execution_policy_document" {
   statement {
     actions = [
@@ -55,10 +52,7 @@ resource "aws_iam_role_policy_attachment" "lambda_apigateway_attachment" {
   policy_arn = aws_iam_policy.lambda_apigateway_policy.arn
 }
 
-# --------------------------------------------
-# GitHub Actions : Accès à DynamoDB Backend
-# --------------------------------------------
-
+# ----------- GitHub Actions Role Policy -----------
 data "aws_iam_policy_document" "github_actions_dynamodb_backend_policy" {
   statement {
     effect = "Allow"
@@ -70,7 +64,7 @@ data "aws_iam_policy_document" "github_actions_dynamodb_backend_policy" {
       "dynamodb:UpdateItem"
     ]
     resources = [
-      "arn:aws:dynamodb:eu-west-1:980827392248:table/terraform-backend-TerraformBackendDynamoDBTable-1MWDTO5LZO1U9"
+      "arn:aws:dynamodb:eu-west-1:908027392248:table/terraform-backend-TerraformBackendDynamoDBTable-1MWDTO5LZO1U9"
     ]
   }
 }
@@ -81,7 +75,6 @@ resource "aws_iam_policy" "github_actions_dynamodb_backend_policy" {
   policy      = data.aws_iam_policy_document.github_actions_dynamodb_backend_policy.json
 }
 
-# Référence à un rôle déjà existant (déjà créé dans AWS)
 data "aws_iam_role" "github_actions_role" {
   name = "deploy-terraform"
 }

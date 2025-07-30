@@ -97,7 +97,10 @@ resource "aws_api_gateway_integration_response" "options" {
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'"
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
+
+  depends_on = [aws_api_gateway_integration.options_method]
 }
+
 
 # Lambda permission for API Gateway
 resource "aws_lambda_permission" "apigw_lambda" {
