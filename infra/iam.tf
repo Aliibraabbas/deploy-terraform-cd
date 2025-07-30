@@ -91,11 +91,14 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
     actions = [
       "apigateway:GET",
       "dynamodb:DescribeTable",
-      "lambda:GetFunction"
+      "dynamodb:DescribeContinuousBackups",
+      "lambda:GetFunction",
+      "lambda:ListVersionsByFunction"
     ]
-    resources = ["*"] # tu peux restreindre ça à des ARNs précis plus tard si besoin
+    resources = ["*"]
   }
 }
+
 
 resource "aws_iam_policy" "github_actions_extra_permissions_policy" {
   name        = "github-actions-extra-permissions"
