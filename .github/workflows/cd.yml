@@ -3,11 +3,11 @@ name: Terraform CD Pipeline
 on:
   push:
     branches:
-      - main  # déploiement uniquement sur la branche main
+      - main  # Déploiement uniquement sur la branche main
 
 permissions:
-  id-token: write       # pour OIDC
-  contents: read        # pour lire le repo
+  id-token: write       # Pour OIDC
+  contents: read        # Pour lire le repo
 
 jobs:
   terraform_deploy:
@@ -23,17 +23,17 @@ jobs:
       - name: ⚙️ Configuration des identifiants AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          audience: sts.amazonaws.com
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: eu-west-1
+          audience: sts.amazonaws.com
 
-      - name: 🔍 Debug - Vérifier le rôle AWS utilisé
+      - name: 🔍 Debug - Vérifier l’identité utilisée
         run: aws sts get-caller-identity
 
       - name: ⛏️ Installer Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: "1.12.1"
+          terraform_version: 1.12.1
 
       - name: 📦 Init + Apply Terraform
         run: |
