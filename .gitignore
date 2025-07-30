@@ -1,0 +1,31 @@
+# Node.js
+node_modules/
+.env
+npm-debug.log
+
+# Logs
+*.log
+logs/
+*.zip
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.tar
+*.img
+docker-compose.override.yml
+
+# Build
+dist/
+build/
+
+# AWS / Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+terraform.tfvars
