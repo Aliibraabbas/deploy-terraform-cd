@@ -27,6 +27,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: eu-west-1
 
+      - name: 🔍 Debug - Vérifier le rôle AWS utilisé
+        run: aws sts get-caller-identity
+
       - name: ⛏️ Installer Terraform
         uses: hashicorp/setup-terraform@v2
         with:
