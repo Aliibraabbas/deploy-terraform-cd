@@ -83,3 +83,27 @@ resource "aws_iam_role_policy_attachment" "github_actions_backend_policy_attachm
   role       = data.aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_dynamodb_backend_policy.arn
 }
+
+
+data "aws_iam_policy_document" "github_actions_extra_permissions" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "apigateway:GET",
+      "dynamodb:DescribeTable",
+      "lambda:GetFunction"
+    ]
+    resources = ["*"] # tu peux restreindre ça à des ARNs précis plus tard si besoin
+  }
+}
+
+resource "aws_iam_policy" "github_actions_extra_permissions_policy" {
+  name        = "github-actions-extra-permissions"
+  description = "Allow GitHub Actions to access API Gateway, Lambda and DynamoDB read access"
+  policy      = data.aws_iam_policy_document.github_actions_extra_permissions.json
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_extra_permissions_attachment" {
+  role       = data.aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.github_actions_extra_permissions_policy.arn
+}
