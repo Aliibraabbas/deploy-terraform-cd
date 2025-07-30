@@ -1,3 +1,8 @@
+variable "aws_region" {
+  type = string
+  default = "eu-west-1"
+}
+
 variable "bucket_name" {
   type = string
   description = "The bucket name"
@@ -10,10 +15,12 @@ variable "tags" {
     Environment = string
   })
   default = {
-    Name = "tp_bucket"
+    Name = "archidevops-tp5"
     Environment = "dev"
+    Deployment = "Terraform"
   }
 }
+
 
 
 variable "mime_types" {
