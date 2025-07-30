@@ -93,13 +93,16 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
+      "dynamodb:ListTagsOfResource",
       "lambda:GetFunction",
+      "lambda:GetFunctionCodeSigningConfig",
       "lambda:ListVersionsByFunction",
-      "lambda:GetFunctionCodeSigningConfig"
+      "lambda:GetPolicy"
     ]
     resources = ["*"]
   }
 }
+
 
 
 
