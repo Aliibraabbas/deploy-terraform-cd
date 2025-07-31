@@ -140,7 +140,7 @@ rm -rf terraform-backend/
 
 
 ## 📦 Structure du projet
-
+```bash
 deploy-terraform-cd/
 ├── client/                      # Frontend React (Vite + Nginx)
 │   ├── Dockerfile, vite.config.js, nginx.conf, ...
@@ -157,7 +157,7 @@ deploy-terraform-cd/
 ├── .github/workflows/          # CI/CD GitHub Actions
 │   ├── ci.yml, deploy.yml, cd.yml
 └── docker-compose.yml          # Lancement local
-
+```
 ---
 
 ## 🧪 Lancer le projet en local
