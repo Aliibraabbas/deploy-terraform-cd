@@ -1,34 +1,35 @@
-name: Deploy Docker Images
+name: Build & Push Docker Images
 
 on:
   push:
     branches:
       - main
 
+env:
+  CLIENT_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/deploy-terraform-cd-client
+  SERVER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/deploy-terraform-cd-server
+
 jobs:
-  build-and-push:
+  docker:
+    name: 🐳 Docker Build & Push
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Cloner le repo
+      - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔑 Se connecter à Docker Hub
+      - name: 🔑 Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 🔧 Build et push du client
-      - name: 🛠️ Build client
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/client-app ./client
+      - name: 🛠️ Build & Push Client
+        run: |
+          docker build -t $CLIENT_IMAGE ./client
+          docker push $CLIENT_IMAGE
 
-      - name: 🚀 Push client
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/client-app
-
-      # 🔧 Build et push du serveur
-      - name: 🛠️ Build server
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/server-api ./server
-
-      - name: 🚀 Push server
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/server-api
+      - name: 🛠️ Build & Push Server
+        run: |
+          docker build -t $SERVER_IMAGE ./server
+          docker push $SERVER_IMAGE

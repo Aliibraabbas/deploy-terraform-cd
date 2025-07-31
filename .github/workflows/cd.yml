@@ -3,14 +3,15 @@ name: Terraform CD Pipeline
 on:
   push:
     branches:
-      - main  # Déploiement uniquement sur la branche main
+      - main
 
 permissions:
-  id-token: write       # Pour OIDC
-  contents: read        # Pour lire le repo
+  id-token: write
+  contents: read
 
 jobs:
-  terraform_deploy:
+  deploy:
+    name: 📦 Terraform Deploy
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,7 +24,7 @@ jobs:
       - name: ⚙️ Configuration des identifiants AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
+          role-to-assume: ${{secrets.AWS_IAM_ROLE}}
           aws-region: eu-west-1
           audience: sts.amazonaws.com
 
