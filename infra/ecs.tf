@@ -55,10 +55,10 @@ resource "aws_ecs_task_definition" "app_task" {
     }
   ])
 
-  lifecycle {
-    create_before_destroy = true
+#   lifecycle {
+#     create_before_destroy = true
 
-  }
+#   }
 }
 
 # ✅ ECS Service
