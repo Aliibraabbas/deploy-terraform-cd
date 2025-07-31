@@ -1,21 +1,21 @@
 variable "aws_region" {
-  type = string
+  type    = string
   default = "eu-west-1"
 }
 
 variable "bucket_name" {
-  type = string
+  type        = string
   description = "The bucket name"
-  default = "archidevopsiimwebsite"
+  default     = "archidevopsiimwebsite"
 }
 
 variable "tags" {
   type = object({
-    Name = string
+    Name        = string
     Environment = string
   })
   default = {
-    Name = "archidevops-tp5"
+    Name        = "archidevops-tp5"
     Environment = "dev"
     # Deployment = "Terraform"
   }
@@ -43,10 +43,10 @@ variable "sync_directories" {
     s3_target_directory    = string
   }))
   description = "List of directories to synchronize with Amazon S3."
-  default     = [{
-  local_source_directory = "../client/dist"
-  s3_target_directory    = ""
-}]
+  default = [{
+    local_source_directory = "../client/dist"
+    s3_target_directory    = ""
+  }]
 }
 
 

@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" "lambda_apigateway_table" {
-  name             = "lambda-apigateway"
-  hash_key         = "id"
-  billing_mode     = "PAY_PER_REQUEST"
+  name         = "lambda-apigateway"
+  hash_key     = "id"
+  billing_mode = "PAY_PER_REQUEST"
 
   attribute {
     name = "id"

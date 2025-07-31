@@ -1,4 +1,5 @@
 # ----------- Lambda Role & Policy -----------
+
 data "aws_iam_policy_document" "lambda_execution_policy_document" {
   statement {
     actions = [
@@ -21,7 +22,7 @@ data "aws_iam_policy_document" "lambda_execution_policy_document" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
   }
 }
@@ -52,7 +53,8 @@ resource "aws_iam_role_policy_attachment" "lambda_apigateway_attachment" {
   policy_arn = aws_iam_policy.lambda_apigateway_policy.arn
 }
 
-# ----------- GitHub Actions Role Policy -----------
+# ----------- GitHub Actions Role & Policies -----------
+
 data "aws_iam_policy_document" "github_actions_dynamodb_backend_policy" {
   statement {
     effect = "Allow"
@@ -83,7 +85,6 @@ resource "aws_iam_role_policy_attachment" "github_actions_backend_policy_attachm
   role       = data.aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_dynamodb_backend_policy.arn
 }
-
 
 data "aws_iam_policy_document" "github_actions_extra_permissions" {
   statement {
@@ -121,12 +122,12 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "elasticloadbalancing:DescribeTargetGroupAttributes",
       "elasticloadbalancing:DescribeTags",
       "elasticloadbalancing:DescribeListeners",
-      "elasticloadbalancing:DescribeListenerAttributes",     
+      "elasticloadbalancing:DescribeListenerAttributes",
 
       # ECS
       "ecs:DescribeClusters",
       "ecs:DescribeServices",
-      "ecs:RegisterTaskDefinition", 
+      "ecs:RegisterTaskDefinition",
 
       # CloudWatch Logs
       "logs:DescribeLogGroups",
@@ -135,12 +136,6 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
     resources = ["*"]
   }
 }
-
-
-
-
-
-
 
 resource "aws_iam_policy" "github_actions_extra_permissions_policy" {
   name        = "github-actions-extra-permissions"
@@ -151,4 +146,31 @@ resource "aws_iam_policy" "github_actions_extra_permissions_policy" {
 resource "aws_iam_role_policy_attachment" "github_actions_extra_permissions_attachment" {
   role       = data.aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_extra_permissions_policy.arn
+}
+
+# ----------- ECS Task Execution Role -----------
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_cloudwatch_logs" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
