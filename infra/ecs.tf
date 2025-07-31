@@ -2,6 +2,7 @@ resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
+# ✅ Log groups (uniques)
 resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/backend"
   retention_in_days = 7
@@ -62,7 +63,7 @@ resource "aws_ecs_service" "app_service" {
   desired_count   = 1
 
   network_configuration {
-    subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+    subnets         = [aws_subnet.public_a.id, aws_subnet.public_b.id]
     assign_public_ip = true
     security_groups  = [aws_security_group.ecs_tasks.id]
   }
