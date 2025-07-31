@@ -6,12 +6,13 @@ on:
       - main
 
 env:
+  REGISTRY: docker.io
   CLIENT_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/deploy-terraform-cd-client
   SERVER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/deploy-terraform-cd-server
 
 jobs:
   docker:
-    name: 🐳 Docker Build & Push
+    name: 🐳 Build & Push Docker Images
     runs-on: ubuntu-latest
 
     steps:
@@ -24,12 +25,31 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 🛠️ Build & Push Client
-        run: |
-          docker build -t $CLIENT_IMAGE ./client
-          docker push $CLIENT_IMAGE
+      - name: 🏷️ Set image version
+        id: version
+        run: echo "version=v1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: 🛠️ Build & Push Server
+      - name: 🏗️ Build & Push Client image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: |
+            ${{ env.CLIENT_IMAGE }}:latest
+            ${{ env.CLIENT_IMAGE }}:${{ steps.version.outputs.version }}
+
+      - name: 🏗️ Build & Push Server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.SERVER_IMAGE }}:latest
+            ${{ env.SERVER_IMAGE }}:${{ steps.version.outputs.version }}
+
+      - name: ✅ Confirm pushed images
         run: |
-          docker build -t $SERVER_IMAGE ./server
-          docker push $SERVER_IMAGE
+          echo "✅ Client image: ${{ env.CLIENT_IMAGE }}:${{ steps.version.outputs.version }}"
+          echo "✅ Server image: ${{ env.SERVER_IMAGE }}:${{ steps.version.outputs.version }}"
