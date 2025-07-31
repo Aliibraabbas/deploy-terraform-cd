@@ -68,7 +68,7 @@ Automatisation complète à chaque PR vers `main` :
 ├── ci.yml         # Étapes CI : build & test
 ├── deploy.yml     # Push des images Docker
 └── cd.yml         # Déploiement Terraform
-
+```
 
 ## 🔐 Configuration requise (Secrets GitHub Actions)
 
