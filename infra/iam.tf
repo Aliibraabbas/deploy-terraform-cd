@@ -90,7 +90,8 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
     effect = "Allow"
     actions = [
       "apigateway:GET",
-      "apigateway:PUT",                
+      "apigateway:PUT",
+      "apigateway:DELETE",           
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
