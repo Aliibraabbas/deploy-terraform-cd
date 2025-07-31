@@ -75,4 +75,8 @@ resource "aws_ecs_service" "app_service" {
   }
 
   depends_on = [aws_lb_listener.app_listener]
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 }
