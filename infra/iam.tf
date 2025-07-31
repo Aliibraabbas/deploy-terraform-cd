@@ -100,15 +100,19 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "lambda:ListVersionsByFunction",
       "lambda:GetPolicy",
       "lambda:UpdateFunctionCode",
+      
       "ec2:DescribeVpcs",
       "ec2:DescribeSubnets",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeRouteTables",
-      "ec2:DescribeInternetGateways"
+      "ec2:DescribeInternetGateways",
+
+      "ec2:DescribeVpcAttribute"
     ]
     resources = ["*"]
   }
 }
+
 
 
 
