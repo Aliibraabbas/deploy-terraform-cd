@@ -90,7 +90,7 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
     effect = "Allow"
     actions = [
       "apigateway:GET",
-      "apigateway:PUT",               
+      "apigateway:PUT",                
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
@@ -99,11 +99,17 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "lambda:GetFunctionCodeSigningConfig",
       "lambda:ListVersionsByFunction",
       "lambda:GetPolicy",
-      "lambda:UpdateFunctionCode"    
+      "lambda:UpdateFunctionCode",
+      "ec2:DescribeVpcs",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeRouteTables",
+      "ec2:DescribeInternetGateways"
     ]
     resources = ["*"]
   }
 }
+
 
 
 
