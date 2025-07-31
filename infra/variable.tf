@@ -17,7 +17,7 @@ variable "tags" {
   default = {
     Name = "archidevops-tp5"
     Environment = "dev"
-    Deployment = "Terraform"
+    # Deployment = "Terraform"
   }
 }
 
@@ -47,4 +47,20 @@ variable "sync_directories" {
   local_source_directory = "../client/dist"
   s3_target_directory    = ""
 }]
+}
+
+
+variable "dockerhub_username" {
+  description = "Docker Hub username"
+  type        = string
+}
+
+variable "client_image_tag" {
+  description = "Frontend image tag"
+  type        = string
+}
+
+variable "server_image_tag" {
+  description = "Backend image tag"
+  type        = string
 }
