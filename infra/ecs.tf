@@ -28,13 +28,13 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_cloudwatch_logs" {
 }
 
 resource "aws_ecs_task_definition" "app_task" {
-  family                   = "app-task"
+  family                   = "app-task-v2"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  skip_destroy             = true
+#   skip_destroy             = true
 
   container_definitions = jsonencode([
     {
