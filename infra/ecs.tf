@@ -2,7 +2,7 @@ resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
-# 🔹 CloudWatch Log Groups
+# ✅ Log groups
 resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/backend"
   retention_in_days = 7
@@ -13,7 +13,7 @@ resource "aws_cloudwatch_log_group" "frontend" {
   retention_in_days = 7
 }
 
-# 🔹 ECS Task Definition
+# ✅ ECS Task Definition
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
   network_mode             = "awsvpc"
@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "app_task" {
   }
 }
 
-# 🔹 ECS Service
+# ✅ ECS Service
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
@@ -80,16 +80,14 @@ resource "aws_ecs_service" "app_service" {
     container_port   = 80
   }
 
-  deployment_controller {
-    type = "ECS"
-  }
-
-  lifecycle {
-    ignore_changes = [task_definition]
-  }
-
   depends_on = [
     aws_ecs_task_definition.app_task,
     aws_lb_listener.app_listener
   ]
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
+  force_new_deployment = true
 }
