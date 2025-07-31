@@ -22,10 +22,6 @@ resource "aws_ecs_task_definition" "app_task" {
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
-  # 🔒 Empêche la suppression avant remplacement
-  skip_destroy = true
-  track_latest = true
-
   container_definitions = jsonencode([
     {
       name  = "backend"
@@ -58,6 +54,10 @@ resource "aws_ecs_task_definition" "app_task" {
       }
     }
   ])
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ✅ ECS Service
