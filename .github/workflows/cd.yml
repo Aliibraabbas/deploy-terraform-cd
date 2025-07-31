@@ -1,9 +1,10 @@
 name: Terraform CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build & Push Docker Images"]
+    types:
+      - completed
 
 permissions:
   id-token: write
@@ -21,23 +22,27 @@ jobs:
       - name: ⬇️ Checkout du code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Configuration des identifiants AWS via OIDC
+      - name: ⚙️ Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
           aws-region: eu-west-1
           audience: sts.amazonaws.com
 
-      - name: 🔍 Debug - Vérifier l’identité utilisée
+      - name: 🔍 Show identity (debug)
         run: aws sts get-caller-identity
 
-      - name: ⛏️ Installer Terraform
+      - name: ⛏️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.12.1
+          terraform_version: 1.6.0
 
       - name: 📦 Init + Apply Terraform
+        env:
+          TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
+          TF_VAR_server_image_tag: v1.0.${{ github.run_number }}
         run: |
           terraform fmt
-          terraform init
+          terraform init -reconfigure
           terraform apply --auto-approve
