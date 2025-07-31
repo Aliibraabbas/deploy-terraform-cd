@@ -115,18 +115,19 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "ec2:DescribeInternetGateways",
       "ec2:DescribeVpcAttribute",
 
-      # Elastic Load Balancing
+      # ELB / Load Balancer
       "elasticloadbalancing:DescribeLoadBalancerAttributes",
       "elasticloadbalancing:DescribeTargetGroups",
       "elasticloadbalancing:DescribeTargetGroupAttributes",
-      "elasticloadbalancing:DescribeTags",           
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:DescribeListeners",     
 
       # ECS
       "ecs:DescribeClusters",
 
       # CloudWatch Logs
       "logs:DescribeLogGroups",
-      "logs:ListTagsForResource"                      
+      "logs:ListTagsForResource"
     ]
     resources = ["*"]
   }
