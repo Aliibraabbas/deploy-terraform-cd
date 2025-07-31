@@ -99,7 +99,7 @@ terraform apply
  Et tu peux l'initialiser via le script bash :
 
  terraform-backend/deploy.sh
-
+```
 ---
 
 ### 📈Observabilité (CloudWatch Logs)
@@ -120,7 +120,7 @@ terraform apply
 🧾 Données bien enregistrées dans DynamoDB
 
 🔍 Application testée dans un vrai navigateur (pas localhost)
-
+```
 ---
 
 
@@ -135,12 +135,12 @@ terraform destroy
 Et supprimer ensuite manuellement le backend :
 
 rm -rf terraform-backend/
-
+```
 ---
 
 
 ## 📦 Structure du projet
-
+```bash
 deploy-terraform-cd/
 ├── client/                      # Frontend React (Vite + Nginx)
 │   ├── Dockerfile, vite.config.js, nginx.conf, ...
@@ -157,7 +157,8 @@ deploy-terraform-cd/
 ├── .github/workflows/          # CI/CD GitHub Actions
 │   ├── ci.yml, deploy.yml, cd.yml
 └── docker-compose.yml          # Lancement local
-
+```
+---
 
 ## 🧪 Lancer le projet en local
 
