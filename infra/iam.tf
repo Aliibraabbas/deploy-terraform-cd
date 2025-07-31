@@ -89,31 +89,41 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
   statement {
     effect = "Allow"
     actions = [
+      # API Gateway
       "apigateway:GET",
       "apigateway:PUT",
-      "apigateway:DELETE",           
+      "apigateway:DELETE",
+
+      # DynamoDB
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
       "dynamodb:ListTagsOfResource",
+
+      # Lambda
       "lambda:GetFunction",
       "lambda:GetFunctionCodeSigningConfig",
       "lambda:ListVersionsByFunction",
       "lambda:GetPolicy",
       "lambda:UpdateFunctionCode",
-      
+
+      # EC2
       "ec2:DescribeVpcs",
       "ec2:DescribeSubnets",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeRouteTables",
       "ec2:DescribeInternetGateways",
+      "ec2:DescribeVpcAttribute",
 
-      "ec2:DescribeVpcAttribute"
+      # ECS
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "ecs:DescribeClusters",
+      "logs:DescribeLogGroups"
     ]
     resources = ["*"]
   }
 }
-
 
 
 
