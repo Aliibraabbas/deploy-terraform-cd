@@ -2,15 +2,14 @@ resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
-# Role IAM pour permettre à ECS de tirer des images et envoyer des logs
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow",
-      Action = "sts:AssumeRole",
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
       Principal = {
         Service = "ecs-tasks.amazonaws.com"
       }
@@ -18,7 +17,6 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   })
 }
 
-# Attach policies pour permettre à ECS de fonctionner correctement
 resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
@@ -29,7 +27,6 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_cloudwatch_logs" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
-# Task Definition contenant les deux conteneurs : frontend + backend
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
   network_mode             = "awsvpc"
@@ -43,9 +40,7 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name  = "frontend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-client:${var.client_image_tag}"
-      portMappings = [
-        { containerPort = 80 }
-      ]
+      portMappings = [{ containerPort = 80 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -58,9 +53,7 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name  = "backend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-server:${var.server_image_tag}"
-      portMappings = [
-        { containerPort = 3005 }
-      ]
+      portMappings = [{ containerPort = 3005 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -73,7 +66,6 @@ resource "aws_ecs_task_definition" "app_task" {
   ])
 }
 
-# Service ECS Fargate qui déploie la task definition avec Load Balancer
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
