@@ -28,7 +28,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_cloudwatch_logs" {
 }
 
 resource "aws_ecs_task_definition" "app_task" {
-  family                   = "app-task-v2"
+  family                   = "app-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
