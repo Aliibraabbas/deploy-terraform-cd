@@ -2,7 +2,7 @@ resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
-# ✅ Log groups (CloudWatch)
+# Log groups pour ECS
 resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/backend"
   retention_in_days = 7
@@ -13,7 +13,7 @@ resource "aws_cloudwatch_log_group" "frontend" {
   retention_in_days = 7
 }
 
-# ✅ ECS Task Definition avec correctifs
+# Task definition
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
   network_mode             = "awsvpc"
@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "app_task" {
   }
 }
 
-# ✅ ECS Service
+# ECS Service
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
