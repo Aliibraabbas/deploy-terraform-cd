@@ -85,5 +85,8 @@ resource "aws_ecs_service" "app_service" {
     container_port   = 80
   }
 
-  depends_on = [aws_lb_listener.app_listener]
+  depends_on = [
+    aws_lb_listener.app_listener,
+    aws_ecs_task_definition.app_task 
+  ]
 }
