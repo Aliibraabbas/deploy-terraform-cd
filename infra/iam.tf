@@ -120,7 +120,8 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
       "elasticloadbalancing:DescribeTargetGroups",
       "elasticloadbalancing:DescribeTargetGroupAttributes",
       "elasticloadbalancing:DescribeTags",
-      "elasticloadbalancing:DescribeListeners",     
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeListenerAttributes",     
 
       # ECS
       "ecs:DescribeClusters",
