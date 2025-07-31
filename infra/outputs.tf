@@ -13,3 +13,8 @@ output "public_subnet_ids" {
 output "security_group_id" {
   value = aws_security_group.ecs_tasks.id
 }
+
+output "app_url" {
+  description = "Public URL of the application"
+  value       = "http://${aws_lb.app_lb.dns_name}"
+}
