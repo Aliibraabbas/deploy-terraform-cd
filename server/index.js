@@ -63,6 +63,11 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
+// ✅ Route health pour ECS/ALB
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // Lancer le serveur
 app.listen(3005, () => {
   console.log("🚀 API Todo en local sur http://localhost:3005");
