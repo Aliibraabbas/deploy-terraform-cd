@@ -13,6 +13,7 @@ resource "aws_cloudwatch_log_group" "frontend" {
   retention_in_days = 7
 }
 
+# ✅ ECS Task Definition — avec fix
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
   network_mode             = "awsvpc"
@@ -20,7 +21,10 @@ resource "aws_ecs_task_definition" "app_task" {
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  track_latest             = true  # ✅ correction ajoutée ici
+
+  # 🔒 Empêche la suppression avant remplacement
+  skip_destroy = true
+  track_latest = true
 
   container_definitions = jsonencode([
     {
@@ -56,15 +60,16 @@ resource "aws_ecs_task_definition" "app_task" {
   ])
 }
 
+# ✅ ECS Service
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
-  task_definition = "${aws_ecs_task_definition.app_task.family}:${aws_ecs_task_definition.app_task.revision}"
+  task_definition = aws_ecs_task_definition.app_task.arn
   launch_type     = "FARGATE"
   desired_count   = 1
 
   network_configuration {
-    subnets         = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+    subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
     assign_public_ip = true
     security_groups  = [aws_security_group.ecs_tasks.id]
   }
@@ -76,8 +81,7 @@ resource "aws_ecs_service" "app_service" {
   }
 
   depends_on = [
-    aws_lb_listener.app_listener,
-    aws_ecs_task_definition.app_task
+    aws_ecs_task_definition.app_task,
+    aws_lb_listener.app_listener
   ]
 }
-
