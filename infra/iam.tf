@@ -125,7 +125,8 @@ data "aws_iam_policy_document" "github_actions_extra_permissions" {
 
       # ECS
       "ecs:DescribeClusters",
-      "ecs:DescribeServices", 
+      "ecs:DescribeServices",
+      "ecs:RegisterTaskDefinition", 
 
       # CloudWatch Logs
       "logs:DescribeLogGroups",
