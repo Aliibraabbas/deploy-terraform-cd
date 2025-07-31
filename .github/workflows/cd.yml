@@ -24,7 +24,7 @@ jobs:
       - name: ⚙️ Configuration des identifiants AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{secrets.AWS_IAM_ROLE}}
+          role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
           aws-region: eu-west-1
           audience: sts.amazonaws.com
 
