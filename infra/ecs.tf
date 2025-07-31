@@ -20,6 +20,7 @@ resource "aws_ecs_task_definition" "app_task" {
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  track_latest             = true  # ✅ correction ajoutée ici
 
   container_definitions = jsonencode([
     {
@@ -74,9 +75,8 @@ resource "aws_ecs_service" "app_service" {
     container_port   = 80
   }
 
-  depends_on = [aws_lb_listener.app_listener]
-
-  lifecycle {
-    ignore_changes = [task_definition]
-  }
+  depends_on = [
+    aws_lb_listener.app_listener,
+    aws_ecs_task_definition.app_task  # ✅ correction ajoutée ici
+  ]
 }
