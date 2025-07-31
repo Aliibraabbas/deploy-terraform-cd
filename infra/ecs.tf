@@ -2,18 +2,19 @@ resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
-# ✅ Log groups (uniques)
+# Log group pour backend
 resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/backend"
   retention_in_days = 7
 }
 
+# Log group pour frontend
 resource "aws_cloudwatch_log_group" "frontend" {
   name              = "/ecs/frontend"
   retention_in_days = 7
 }
 
-# ✅ ECS Task Definition — avec fix
+# ECS Task Definition (sans lifecycle)
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
   network_mode             = "awsvpc"
@@ -54,14 +55,9 @@ resource "aws_ecs_task_definition" "app_task" {
       }
     }
   ])
-
-#   lifecycle {
-#     create_before_destroy = true
-
-#   }
 }
 
-# ✅ ECS Service
+# ECS Service
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
