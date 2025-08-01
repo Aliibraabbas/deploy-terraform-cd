@@ -40,17 +40,11 @@ jobs:
       - name: 📦 Terraform Init
         run: terraform init -reconfigure
 
-      - name: 📌 Apply Task Definition ONLY
+      - name: 🚀 Terraform Apply (full infra, update service)
         env:
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
           TF_VAR_server_image_tag: v1.0.${{ github.run_number }}
-        run: terraform apply -target=aws_ecs_task_definition.app_task --auto-approve
-
-      - name: 💤 Wait for ECS Task Definition registration
-        run: sleep 20
-
-      - name: 🚀 Apply full infrastructure
         run: terraform apply --auto-approve
 
       - name: ✅ Afficher l'URL ALB
