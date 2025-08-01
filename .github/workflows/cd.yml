@@ -37,7 +37,7 @@ jobs:
         with:
           terraform_version: 1.6.0
 
-      - name: 📦 Terraform Init & Apply
+      - name: 📦 Terraform Init, Plan & Apply
         env:
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
@@ -46,10 +46,9 @@ jobs:
           terraform fmt
           terraform init -reconfigure
           terraform plan
+          echo "⌛ Waiting 30s for ECS task definition to propagate..."
+          sleep 60
           terraform apply --auto-approve
-
-      - name: ⏱️ Wait for ECS Task Definition propagation
-        run: sleep 20
 
       - name: ✅ Afficher l'URL ALB (optionnel)
         run: |
