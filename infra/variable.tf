@@ -64,3 +64,8 @@ variable "server_image_tag" {
   description = "Backend image tag"
   type        = string
 }
+
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs for ECS tasks"
+  type        = list(string)
+}
