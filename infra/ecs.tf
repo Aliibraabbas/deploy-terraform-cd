@@ -1,9 +1,13 @@
+resource "random_id" "task_rev" {
+  byte_length = 4
+}
+
 resource "aws_ecs_cluster" "app_cluster" {
   name = "cloud-devops-cluster"
 }
 
 resource "aws_ecs_task_definition" "app_task" {
-  family                   = "app-task"
+  family                   = "app-task-${random_id.task_rev.hex}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -70,4 +74,3 @@ resource "aws_ecs_service" "app_service" {
 
   depends_on = [aws_lb_listener.app_listener]
 }
-

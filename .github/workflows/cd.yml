@@ -58,4 +58,5 @@ jobs:
 
       - name: ✅ Afficher l'URL ALB
         run: |
-          echo "URL ALB: http://$(terraform output -raw alb_dns_name || echo 'non disponible')"
+          echo "App URL: $(terraform output -raw app_url || echo 'non disponible')"
+
