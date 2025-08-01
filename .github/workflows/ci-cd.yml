@@ -1,8 +1,175 @@
-terraform {
-  backend "s3" {
-    bucket         = "cloud-devops-terraform-state-bucket"
-    key            = "terraform.tfstate"
-    region         = "eu-west-1"
-    dynamodb_table = "terraform-backend-lock"
-  }
-}
+name: CI/CD Pipeline Cloud DevOps App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      destroy:
+        description: 'Destroy infrastructure (true/false)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  REGISTRY: docker.io
+  CLIENT_IMAGE: ${{ secrets.DOCKER_USERNAME }}/deploy-terraform-cd-client
+  SERVER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/deploy-terraform-cd-server
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install server dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Install client dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: Build client
+        run: |
+          cd client
+          npm run build
+
+  docker-build-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Generate tags
+        id: meta
+        run: |
+          echo "VERSION=v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+          echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.SERVER_IMAGE }}:latest
+            ${{ env.SERVER_IMAGE }}:${{ steps.meta.outputs.VERSION }}
+            ${{ env.SERVER_IMAGE }}:${{ steps.meta.outputs.SHORT_SHA }}
+
+      - name: Build and push client image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: |
+            ${{ env.CLIENT_IMAGE }}:latest
+            ${{ env.CLIENT_IMAGE }}:${{ steps.meta.outputs.VERSION }}
+            ${{ env.CLIENT_IMAGE }}:${{ steps.meta.outputs.SHORT_SHA }}
+
+  deploy:
+    needs: docker-build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get image tags
+        id: tags
+        run: |
+          echo "VERSION=v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Update Terraform vars
+        run: |
+          cd infra/terraform
+          cp terraform.tfvars terraform.tfvars.bak || true
+          grep -v "server_image_tag\|client_image_tag\|docker_hub_username" terraform.tfvars.bak > terraform.tfvars || true
+          echo "server_image_tag = \"${{ steps.tags.outputs.VERSION }}\"" >> terraform.tfvars
+          echo "client_image_tag = \"${{ steps.tags.outputs.VERSION }}\"" >> terraform.tfvars
+          echo "docker_hub_username = \"${{ secrets.DOCKER_USERNAME }}\"" >> terraform.tfvars
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform
+          terraform init -reconfigure
+
+      - name: Terraform Plan
+        run: |
+          cd infra/terraform
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd infra/terraform
+          terraform apply -auto-approve tfplan
+
+  destroy:
+    if: github.event.inputs.destroy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform
+          terraform init -reconfigure
+
+      - name: Terraform Destroy Plan
+        run: |
+          cd infra/terraform
+          terraform plan -destroy -out=destroy.tfplan
+
+      - name: Terraform Destroy Apply
+        run: |
+          cd infra/terraform
+          terraform apply -auto-approve destroy.tfplan
