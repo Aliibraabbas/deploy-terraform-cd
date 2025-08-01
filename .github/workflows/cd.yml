@@ -43,13 +43,11 @@ jobs:
       - name: 🛠️ Retirer l'état cassé si nécessaire
         run: |
           set +e
-          terraform state show aws_ecs_task_definition.app_task > /dev/null 2>&1
-          if [ $? -ne 0 ]; then
-            echo "🔁 Task ECS introuvable dans AWS. Suppression du state Terraform..."
-            terraform state rm aws_ecs_task_definition.app_task
-          else
-            echo "✅ La Task ECS est valide. Pas besoin de la retirer du state."
-          fi
+          echo "🔎 Vérification si 'app_task' existe dans le state Terraform..."
+          terraform state list | grep aws_ecs_task_definition.app_task && \
+            terraform state rm aws_ecs_task_definition.app_task || \
+            echo "✅ La task 'app_task' n'existe pas dans le state. Rien à faire."
+
 
       - name: 🚀 Terraform Apply (full infra, update service)
         env:
