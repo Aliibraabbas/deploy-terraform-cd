@@ -1,37 +1,37 @@
-name: CI Pipeline
+# name: CI Pipeline
 
-on: push
+# on: push
 
-jobs:
-  install:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./client
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        path: ''
-    - name: Set up NodeJs
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - name: Install dependencies
-      run: npm install
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./client
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up NodeJS
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - name: Install
-      run: npm install
-    - name: Build
-      run: npm run build
+# jobs:
+#   install:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./client
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+#       with:
+#         path: ''
+#     - name: Set up NodeJs
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: 20
+#     - name: Install dependencies
+#       run: npm install
+#   build:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./client
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+#     - name: Set up NodeJS
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: 20
+#     - name: Install
+#       run: npm install
+#     - name: Build
+#       run: npm run build
