@@ -51,15 +51,14 @@ resource "aws_ecs_task_definition" "app_task" {
 
   lifecycle {
     create_before_destroy = true
-    # ignore_changes = [revision]  
+    # Pas besoin d'`ignore_changes = [revision]` ici
   }
 }
-
 
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
-  task_definition = aws_ecs_task_definition.app_task.family != "" ? aws_ecs_task_definition.app_task.arn : null
+  task_definition = aws_ecs_task_definition.app_task.arn
   launch_type     = "FARGATE"
   desired_count   = 1
 
