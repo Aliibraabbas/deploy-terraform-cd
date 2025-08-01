@@ -48,7 +48,10 @@ jobs:
           terraform plan
           echo "⌛ Waiting 30s for ECS task definition to propagate..."
           sleep 60
+          terraform apply -target=aws_ecs_task_definition.app_task --auto-approve
+          sleep 30
           terraform apply --auto-approve
+
 
       - name: ✅ Afficher l'URL ALB (optionnel)
         run: |
