@@ -40,6 +40,17 @@ jobs:
       - name: 📦 Terraform Init
         run: terraform init -reconfigure
 
+      - name: 🛠️ Retirer l'état cassé si nécessaire
+        run: |
+          set +e
+          terraform state show aws_ecs_task_definition.app_task > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "🔁 Task ECS introuvable dans AWS. Suppression du state Terraform..."
+            terraform state rm aws_ecs_task_definition.app_task
+          else
+            echo "✅ La Task ECS est valide. Pas besoin de la retirer du state."
+          fi
+
       - name: 🚀 Terraform Apply (full infra, update service)
         env:
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}

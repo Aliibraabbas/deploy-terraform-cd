@@ -14,36 +14,35 @@ resource "aws_cloudwatch_log_group" "frontend" {
 
 resource "aws_ecs_task_definition" "app_task" {
   family                   = "app-task"
-  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  track_latest             = true
+  network_mode            = "awsvpc"
+  cpu                     = "256"
+  memory                  = "512"
+  execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn           = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
     {
-      name  = "backend"
-      image = "${var.dockerhub_username}/deploy-terraform-cd-server:${var.server_image_tag}"
-      portMappings = [{ containerPort = 3005 }]
+      name  = "frontend"
+      image = "your_dockerhub_user/deploy-terraform-cd-client:${var.client_image_tag}"
+      portMappings = [{ containerPort = 80 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.backend.name
+          awslogs-group         = "/ecs/frontend"
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "ecs"
         }
       }
     },
     {
-      name  = "frontend"
-      image = "${var.dockerhub_username}/deploy-terraform-cd-client:${var.client_image_tag}"
-      portMappings = [{ containerPort = 80 }]
+      name  = "backend"
+      image = "your_dockerhub_user/deploy-terraform-cd-server:${var.server_image_tag}"
+      portMappings = [{ containerPort = 3005 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.frontend.name
+          awslogs-group         = "/ecs/backend"
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "ecs"
         }
@@ -55,6 +54,7 @@ resource "aws_ecs_task_definition" "app_task" {
     create_before_destroy = true
   }
 }
+
 
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
