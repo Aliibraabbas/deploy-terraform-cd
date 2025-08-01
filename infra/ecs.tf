@@ -19,14 +19,13 @@ resource "aws_ecs_task_definition" "app_task" {
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  track_latest             = true
 
   container_definitions = jsonencode([
     {
       name  = "backend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-server:${var.server_image_tag}"
-      portMappings = [{
-        containerPort = 3005
-      }]
+      portMappings = [{ containerPort = 3005 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -39,9 +38,7 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name  = "frontend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-client:${var.client_image_tag}"
-      portMappings = [{
-        containerPort = 80
-      }]
+      portMappings = [{ containerPort = 80 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -61,9 +58,14 @@ resource "aws_ecs_task_definition" "app_task" {
 resource "aws_ecs_service" "app_service" {
   name            = "cloud-devops-service"
   cluster         = aws_ecs_cluster.app_cluster.id
-  task_definition = aws_ecs_task_definition.app_task.arn
   launch_type     = "FARGATE"
   desired_count   = 1
+
+  enable_execute_command = true
+
+  deployment_controller {
+    type = "ECS"
+  }
 
   network_configuration {
     subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
@@ -76,8 +78,6 @@ resource "aws_ecs_service" "app_service" {
     container_name   = "frontend"
     container_port   = 80
   }
-
-  force_new_deployment = true
 
   depends_on = [
     aws_ecs_task_definition.app_task,
