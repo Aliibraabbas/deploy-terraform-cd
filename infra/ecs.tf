@@ -19,6 +19,7 @@ resource "aws_ecs_task_definition" "app_task" {
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
   track_latest             = true
 
   container_definitions = jsonencode([
@@ -60,6 +61,8 @@ resource "aws_ecs_service" "app_service" {
   cluster         = aws_ecs_cluster.app_cluster.id
   launch_type     = "FARGATE"
   desired_count   = 1
+
+  task_definition = aws_ecs_task_definition.app_task.arn 
 
   enable_execute_command = true
 
