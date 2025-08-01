@@ -1,9 +1,8 @@
-name: CI/CD Pipeline - Cloud DevOps
+name: CI/CD Pipeline Cloud DevOps App
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       destroy:
@@ -21,36 +20,44 @@ env:
   SERVER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/deploy-terraform-cd-server
 
 jobs:
-  # --- Build & Test Client ---
-  build-test:
-    name: 🧪 Build & Test Client
+
+  # ✅ JOB 1 — CI : Build + Test
+  ci:
+    name: 🧪 Build & Test
     runs-on: ubuntu-latest
+
     steps:
-      - name: 📥 Checkout code
+      - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: 📦 Install server dependencies
+        run: |
+          cd server
+          npm install
 
       - name: 📦 Install client dependencies
         run: |
           cd client
           npm install
 
-      - name: 🔧 Build client
+      - name: 🏗️ Build client
         run: |
           cd client
           npm run build
 
-  # --- Docker Build & Push ---
+  # ✅ JOB 2 — Docker : Build & Push images
   docker:
     name: 🐳 Build & Push Docker Images
+    needs: ci
     runs-on: ubuntu-latest
-    needs: build-test
+
     steps:
-      - name: 📥 Checkout code
+      - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
       - name: 🔑 Login to DockerHub
@@ -83,28 +90,25 @@ jobs:
             ${{ env.SERVER_IMAGE }}:latest
             ${{ env.SERVER_IMAGE }}:${{ steps.version.outputs.version }}
 
-  # --- Terraform Deploy ---
+  # ✅ JOB 3 — Terraform Deploy
   deploy:
-    name: 📦 Terraform Deploy
-    runs-on: ubuntu-latest
+    name: 🚀 Terraform Deploy
     needs: docker
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./infra
 
     steps:
-      - name: 📥 Checkout code
+      - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Configure AWS credentials via OIDC
+      - name: ⚙️ Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
           aws-region: eu-west-1
           audience: sts.amazonaws.com
-
-      - name: 🔍 Debug AWS identity
-        run: aws sts get-caller-identity
 
       - name: ⛏️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -114,27 +118,27 @@ jobs:
       - name: 📦 Terraform Init
         run: terraform init -reconfigure
 
-      - name: 📌 Apply Task Definition ONLY
+      - name: 📌 Apply ECS Task Definition only
         env:
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
           TF_VAR_server_image_tag: v1.0.${{ github.run_number }}
         run: terraform apply -target=aws_ecs_task_definition.app_task --auto-approve
 
-      - name: 💤 Wait for ECS Task Definition registration
+      - name: 💤 Wait for ECS task registration
         run: sleep 20
 
-      - name: 🚀 Apply full infrastructure
+      - name: 🚀 Apply full Terraform infrastructure
         run: terraform apply --auto-approve
 
-      - name: ✅ Afficher l'URL ALB
+      - name: 🌐 Show ALB URL
         run: |
-          echo "URL ALB: http://$(terraform output -raw alb_dns_name || echo 'non disponible')"
+          echo "ALB URL: http://$(terraform output -raw alb_dns_name || echo 'non disponible')"
 
-  # --- Destroy Infrastructure (Manual Only) ---
+
   # destroy:
-  #   name: ☠️ Destroy Infrastructure
   #   if: github.event.inputs.destroy == 'true'
+  #   name: 🗑️ Destroy infrastructure
   #   runs-on: ubuntu-latest
   #   environment: production
   #   defaults:
@@ -142,10 +146,10 @@ jobs:
   #       working-directory: ./infra
 
   #   steps:
-  #     - name: 📥 Checkout repository
+  #     - name: ⬇️ Checkout code
   #       uses: actions/checkout@v4
 
-  #     - name: ⚙️ Configure AWS credentials via OIDC
+  #     - name: ⚙️ Configure AWS credentials (OIDC)
   #       uses: aws-actions/configure-aws-credentials@v4
   #       with:
   #         role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
@@ -157,11 +161,14 @@ jobs:
   #       with:
   #         terraform_version: 1.6.0
 
-  #     - name: 🔄 Terraform Init
+  #     - name: 🧨 Terraform Init
   #       run: terraform init -reconfigure
 
-  #     - name: 🧨 Terraform Plan Destroy
+  #     - name: 🧨 Plan destroy
   #       run: terraform plan -destroy -out=destroy.tfplan
 
-  #     - name: 🗑️ Terraform Destroy
+  #     - name: 🧨 Apply destroy
   #       run: terraform apply -auto-approve destroy.tfplan
+
+  #     - name: ✅ Destroy complete
+  #       run: echo "Infrastructure détruite avec succès ✅"
