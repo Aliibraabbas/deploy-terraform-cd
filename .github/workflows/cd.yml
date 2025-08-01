@@ -11,71 +11,43 @@ permissions:
   contents: read
 
 jobs:
-  create_task:
-    name: 🛠️ Apply ECS Task Definition
+  deploy:
+    name: 📦 Terraform Deploy
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./infra
 
     steps:
-      - name: ⬇️ Checkout
+      - name: ⬇️ Checkout du code
         uses: actions/checkout@v4
 
-      - name: ⚙️ AWS Credentials
+      - name: ⚙️ Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
           aws-region: eu-west-1
+          audience: sts.amazonaws.com
+
+      - name: 🔍 Debug AWS identity
+        run: aws sts get-caller-identity
 
       - name: ⛏️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.6.0
 
-      - name: 📦 Terraform Init
-        run: terraform init -reconfigure
-
-      - name: 🚀 Apply Task Definition
+      - name: 📦 Terraform Init & Apply
         env:
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
           TF_VAR_server_image_tag: v1.0.${{ github.run_number }}
-        run: terraform apply -target=aws_ecs_task_definition.app_task --auto-approve
-
-  deploy_all:
-    name: 🚀 Full Deploy
-    needs: create_task
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./infra
-
-    steps:
-      - name: ⬇️ Checkout
-        uses: actions/checkout@v4
-
-      - name: ⚙️ AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::908027392248:role/deploy-terraform
-          aws-region: eu-west-1
-
-      - name: ⛏️ Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.6.0
-
-      - name: 📦 Terraform Init
-        run: terraform init -reconfigure
-
-      - name: 🌍 Apply infrastructure
-        env:
-          TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          TF_VAR_client_image_tag: v1.0.${{ github.run_number }}
-          TF_VAR_server_image_tag: v1.0.${{ github.run_number }}
-        run: terraform apply --auto-approve
-
-      - name: ✅ ALB Output
         run: |
-          echo "URL ALB: http://$(terraform output -raw alb_dns_name || echo 'non disponible')"
+          terraform fmt
+          terraform init -reconfigure
+          terraform plan
+          terraform apply --auto-approve
+
+      - name: ✅ Afficher l'URL ALB (optionnel)
+        run: |
+          echo "URL ALB (si applicable): http://$(terraform output -raw alb_dns_name || echo 'non disponible')"

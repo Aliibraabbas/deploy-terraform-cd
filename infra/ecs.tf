@@ -24,7 +24,9 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name  = "backend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-server:${var.server_image_tag}"
-      portMappings = [{ containerPort = 3005 }]
+      portMappings = [{
+        containerPort = 3005
+      }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -37,7 +39,9 @@ resource "aws_ecs_task_definition" "app_task" {
     {
       name  = "frontend"
       image = "${var.dockerhub_username}/deploy-terraform-cd-client:${var.client_image_tag}"
-      portMappings = [{ containerPort = 80 }]
+      portMappings = [{
+        containerPort = 80
+      }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -51,7 +55,6 @@ resource "aws_ecs_task_definition" "app_task" {
 
   lifecycle {
     create_before_destroy = true
-    # Pas besoin d'`ignore_changes = [revision]` ici
   }
 }
 
@@ -73,6 +76,8 @@ resource "aws_ecs_service" "app_service" {
     container_name   = "frontend"
     container_port   = 80
   }
+
+  force_new_deployment = true
 
   depends_on = [
     aws_ecs_task_definition.app_task,
