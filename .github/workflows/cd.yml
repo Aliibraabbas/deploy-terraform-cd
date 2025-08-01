@@ -48,6 +48,9 @@ jobs:
           terraform plan
           terraform apply --auto-approve
 
+      - name: ⏱️ Wait for ECS Task Definition propagation
+        run: sleep 20
+
       - name: ✅ Afficher l'URL ALB (optionnel)
         run: |
           echo "URL ALB (si applicable): http://$(terraform output -raw alb_dns_name || echo 'non disponible')"
